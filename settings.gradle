@@ -104,6 +104,8 @@ include(
     'mapstruct:mapstruct-java-extension',
     'mapstruct:mapstruct-ksp-extension',
     'bpmn:bpmn-camunda7-engine',
+    'bpmn:bpmn-camunda7-rest',
+    'bpmn:bpmn-camunda7-webapp',
 )
 
 apply from: 'dependencies.gradle'
