@@ -24,7 +24,7 @@ public interface UndertowHttpServerModule extends UndertowModule {
     default UndertowHttpServer undertowHttpServer(ValueOf<HttpServerConfig> config,
                                                   @Tag(PublicApiHandler.class) ValueOf<HttpHandler> handler,
                                                   XnioWorker worker) {
-        return new UndertowHttpServer(config, handler, worker);
+        return new UndertowHttpServer("Public", config, handler, worker);
     }
 
     @DefaultComponent
