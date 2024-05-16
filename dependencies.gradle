@@ -23,7 +23,6 @@ dependencyResolutionManagement { DependencyResolutionManagement it ->
             version('swagger', '2.2.21')
             version('opentelemetry', '1.37.0')
             version('undertow', '2.3.13.Final')
-            version('camunda7', '7.21.0')
             version('zeebe', '8.5.0')
 
             library('jsr305', 'com.google.code.findbugs', 'jsr305').version('3.0.2')
@@ -168,14 +167,6 @@ dependencyResolutionManagement { DependencyResolutionManagement it ->
             library('swagger-core', 'io.swagger.core.v3', 'swagger-core').versionRef("swagger")
             library('swagger-models', 'io.swagger.core.v3', 'swagger-models').versionRef("swagger")
             library('swagger-annotations', 'io.swagger.core.v3', 'swagger-annotations').versionRef("swagger")
-
-            library('camunda7-engine', 'org.camunda.bpm', 'camunda-engine').versionRef('camunda7')
-            library('camunda7-rest-jakarta', 'org.camunda.bpm', 'camunda-engine-rest-jakarta').versionRef('camunda7')
-            library('camunda7-webapp-jakarta', 'org.camunda.bpm.webapp', 'camunda-webapp-jakarta').versionRef('camunda7')
-            library('camunda7-webapp-webjar', 'org.camunda.bpm.webapp', 'camunda-webapp-webjar').versionRef('camunda7')
-            library('fasterxml-uuidgenerator', 'com.fasterxml.uuid', 'java-uuid-generator').version('5.0.0')
-            library('resteasy-undertow-jakarta', 'org.jboss.resteasy', 'resteasy-undertow').version('6.2.8.Final')
-            library('jakarta-rs-api', 'jakarta.ws.rs', 'jakarta.ws.rs-api').version('3.1.0')
 
             library('zeebe-model', 'io.camunda', 'zeebe-bpmn-model').versionRef('zeebe')
             library('zeebe-client', 'io.camunda', 'zeebe-client-java').versionRef('zeebe')
