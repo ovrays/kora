@@ -2,7 +2,6 @@ package ru.tinkoff.kora.http.server.undertow;
 
 import io.undertow.Undertow;
 import jakarta.annotation.Nullable;
-import io.undertow.server.HttpHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.XnioWorker;
@@ -19,15 +18,14 @@ public class UndertowPrivateHttpServer implements PrivateHttpServer {
     private static final Logger logger = LoggerFactory.getLogger(UndertowPrivateHttpServer.class);
 
     private final ValueOf<HttpServerConfig> config;
-    private final HttpHandler privateApiHandler;
+    private final ValueOf<UndertowPrivateApiHandler> privateApiHandler;
     private final XnioWorker xnioWorker;
-
     private volatile Undertow undertow;
 
-    public UndertowPrivateHttpServer(ValueOf<HttpServerConfig> config, ValueOf<HttpHandler> privateApiHandler, @Nullable XnioWorker xnioWorker) {
+    public UndertowPrivateHttpServer(ValueOf<HttpServerConfig> config, ValueOf<UndertowPrivateApiHandler> privateApiHandler, @Nullable XnioWorker xnioWorker) {
         this.config = config;
-        this.privateApiHandler = exchange -> privateApiHandler.get().handleRequest(exchange);
         this.xnioWorker = xnioWorker;
+        this.privateApiHandler = privateApiHandler;
     }
 
     @Override
@@ -58,7 +56,7 @@ public class UndertowPrivateHttpServer implements PrivateHttpServer {
 
     private Undertow createServer() {
         return Undertow.builder()
-            .addHttpListener(this.config.get().privateApiHttpPort(), "0.0.0.0", this.privateApiHandler)
+            .addHttpListener(this.config.get().privateApiHttpPort(), "0.0.0.0", exchange -> this.privateApiHandler.get().handleRequest(exchange))
             .setWorker(this.xnioWorker)
             .build();
     }

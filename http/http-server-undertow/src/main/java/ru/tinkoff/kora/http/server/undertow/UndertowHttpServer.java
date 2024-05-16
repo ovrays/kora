@@ -1,7 +1,6 @@
 package ru.tinkoff.kora.http.server.undertow;
 
 import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.GracefulShutdownHandler;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -24,22 +23,17 @@ public class UndertowHttpServer implements HttpServer, ReadinessProbe {
     private static final Logger logger = LoggerFactory.getLogger(UndertowHttpServer.class);
 
     private final AtomicReference<HttpServerState> state = new AtomicReference<>(HttpServerState.INIT);
-    private final String name;
     private final ValueOf<HttpServerConfig> config;
+    private final ValueOf<UndertowPublicApiHandler> publicApiHandler;
     private final GracefulShutdownHandler gracefulShutdown;
     private final XnioWorker xnioWorker;
-
     private volatile Undertow undertow;
 
-    public UndertowHttpServer(String name,
-                              ValueOf<HttpServerConfig> config,
-                              ValueOf<HttpHandler> publicApiHandler,
-                              @Nullable XnioWorker xnioWorker) {
-        this.name = name;
+    public UndertowHttpServer(ValueOf<HttpServerConfig> config, ValueOf<UndertowPublicApiHandler> publicApiHandler, @Nullable XnioWorker xnioWorker) {
         this.config = config;
         this.xnioWorker = xnioWorker;
         this.publicApiHandler = publicApiHandler;
-        this.gracefulShutdown = new GracefulShutdownHandler(exchange -> publicApiHandler.get().handleRequest(exchange));
+        this.gracefulShutdown = new GracefulShutdownHandler(exchange -> this.publicApiHandler.get().handleRequest(exchange));
     }
 
     @Override
@@ -55,7 +49,7 @@ public class UndertowHttpServer implements HttpServer, ReadinessProbe {
         final long started = TimeUtils.started();
         this.gracefulShutdown.shutdown();
         try {
-            logger.debug("{} HTTP Server (Undertow) awaiting graceful shutdown...", name);
+            logger.debug("Public HTTP Server (Undertow) awaiting graceful shutdown...");
             this.gracefulShutdown.awaitShutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -65,19 +59,19 @@ public class UndertowHttpServer implements HttpServer, ReadinessProbe {
             this.undertow.stop();
             this.undertow = null;
         }
-        logger.info("{} HTTP Server (Undertow) stopped in {}", TimeUtils.tookForLogging(started));
+        logger.info("Public HTTP Server (Undertow) stopped in {}", TimeUtils.tookForLogging(started));
     }
 
     @Override
     public void init() {
-        logger.debug("{} HTTP Server (Undertow) starting...", name);
+        logger.debug("Public HTTP Server (Undertow) starting...");
         final long started = TimeUtils.started();
         this.gracefulShutdown.start();
         this.undertow = this.createServer();
         this.undertow.start();
         this.state.set(HttpServerState.RUN);
         var data = StructuredArgument.marker("port", this.port());
-        logger.info(data, "{} HTTP Server (Undertow) started in {}", TimeUtils.tookForLogging(started));
+        logger.info(data, "Public HTTP Server (Undertow) started in {}", TimeUtils.tookForLogging(started));
     }
 
     private Undertow createServer() {
@@ -100,9 +94,9 @@ public class UndertowHttpServer implements HttpServer, ReadinessProbe {
     @Override
     public ReadinessProbeFailure probe() {
         return switch (this.state.get()) {
-            case INIT -> new ReadinessProbeFailure(name + " HTTP Server (Undertow) init");
+            case INIT -> new ReadinessProbeFailure("Public HTTP Server (Undertow) init");
             case RUN -> null;
-            case SHUTDOWN -> new ReadinessProbeFailure(name + "HTTP Server (Undertow) shutdown");
+            case SHUTDOWN -> new ReadinessProbeFailure("Public HTTP Server (Undertow) shutdown");
         };
     }
 
